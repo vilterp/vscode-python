@@ -214,8 +214,9 @@ To test end-to-end:
 1. **README.md** - Architecture, components, data flow
 2. **PROFILING_USAGE.md** - User guide, troubleshooting, tips
 3. **PROFILING_UI.md** - UI specification, visual layout
-4. **profiling_demo.py** - Example script for testing
-5. **Inline Comments** - All code documented
+4. **DEBUGPY_SETUP.md** - Custom debugpy installation guide (NEW)
+5. **profiling_demo.py** - Example script for testing
+6. **Inline Comments** - All code documented
 
 ## 🚀 Ready for Testing
 
@@ -231,6 +232,8 @@ npm run compile
 # (Use vilterp/debugpy#1 branch)
 pip install git+https://github.com/vilterp/debugpy.git@profiling-support
 ```
+
+> **📦 Detailed Setup:** See [DEBUGPY_SETUP.md](./DEBUGPY_SETUP.md) for comprehensive instructions on installing and configuring custom debugpy, including multiple methods and troubleshooting.
 
 ### Test Steps
 ```bash

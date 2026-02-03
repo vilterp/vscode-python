@@ -2,6 +2,33 @@
 
 This implementation adds live profiling support to the VS Code Python extension, consuming the profiling API from debugpy.
 
+## Documentation
+
+- **[User Guide](../../../PROFILING_USAGE.md)** - How to use the profiling feature
+- **[debugpy Setup](../../../DEBUGPY_SETUP.md)** - Installing custom debugpy with profiling support
+- **[UI Specification](../../../PROFILING_UI.md)** - UI layout and design
+- **[Implementation Summary](../../../IMPLEMENTATION_SUMMARY.md)** - Complete technical overview
+- **[Demo Script](../../../profiling_demo.py)** - Example for testing
+
+## Quick Start
+
+### 1. Install Custom debugpy
+
+```bash
+pip install git+https://github.com/vilterp/debugpy.git@profiling-support
+```
+
+For detailed setup instructions, see [DEBUGPY_SETUP.md](../../../DEBUGPY_SETUP.md).
+
+### 2. Debug Your Code
+
+1. Open a Python file
+2. Start debugging (F5)
+3. Click ⏺ (Record) button in debug toolbar
+4. Profile viewer opens automatically
+5. Continue execution to collect samples
+6. Click ⏹ (Stop) to end profiling
+
 ## Features
 
 ### 1. Debug Toolbar Integration

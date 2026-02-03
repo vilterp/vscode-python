@@ -7,6 +7,24 @@
 - debugpy with profiling support (vilterp/debugpy PR #1)
 - Python debug configuration set up
 
+> **📦 Installing Custom debugpy:** See [DEBUGPY_SETUP.md](./DEBUGPY_SETUP.md) for detailed instructions on installing and configuring the custom debugpy version required for profiling support.
+
+### Quick Setup for Testing
+
+If you just want to test the profiling feature quickly:
+
+```bash
+# Install debugpy with profiling support
+pip install git+https://github.com/vilterp/debugpy.git@profiling-support
+
+# Verify installation
+python -c "import debugpy; print('debugpy installed at:', debugpy.__file__)"
+```
+
+Then start debugging in VS Code - the extension will automatically use this debugpy version.
+
+For more installation options, troubleshooting, and advanced configurations, see [DEBUGPY_SETUP.md](./DEBUGPY_SETUP.md).
+
 ### Step-by-Step Instructions
 
 #### 1. Start Debugging
