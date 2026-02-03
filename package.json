@@ -391,6 +391,18 @@
                 "category": "Python",
                 "command": "python.installJupyter",
                 "title": "%python.command.python.installJupyter.title%"
+            },
+            {
+                "category": "Python",
+                "command": "python.startProfiling",
+                "title": "Start Profiling",
+                "icon": "$(record)"
+            },
+            {
+                "category": "Python",
+                "command": "python.stopProfiling",
+                "title": "Stop Profiling",
+                "icon": "$(debug-stop)"
             }
         ],
         "configuration": {
@@ -1251,6 +1263,18 @@
                     "when": "controllerId == 'python-tests'"
                 }
             ],
+            "debug/toolBar": [
+                {
+                    "command": "python.startProfiling",
+                    "when": "debugType == 'python' && debugState == 'running'",
+                    "group": "navigation@99"
+                },
+                {
+                    "command": "python.stopProfiling",
+                    "when": "debugType == 'python' && debugState == 'running'",
+                    "group": "navigation@100"
+                }
+            ],
             "commandPalette": [
                 {
                     "category": "Python",
@@ -1747,6 +1771,8 @@
         "@types/lodash": "^4.14.104",
         "@types/mocha": "^9.1.0",
         "@types/node": "^22.19.1",
+        "@types/react": "^19.2.10",
+        "@types/react-dom": "^19.2.3",
         "@types/semver": "^5.5.0",
         "@types/shortid": "^0.0.29",
         "@types/sinon": "^17.0.3",
@@ -1789,6 +1815,9 @@
         "node-polyfill-webpack-plugin": "^1.1.4",
         "nyc": "^15.0.0",
         "prettier": "^2.0.2",
+        "react": "^16.14.0",
+        "react-dom": "^16.14.0",
+        "react-flame-graph": "^1.4.0",
         "rewiremock": "^3.13.0",
         "shortid": "^2.2.8",
         "sinon": "^18.0.0",

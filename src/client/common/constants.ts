@@ -67,6 +67,8 @@ export namespace Commands {
     export const Tests_CopilotSetup = 'python.copilotSetupTests';
     export const TriggerEnvironmentSelection = 'python.triggerEnvSelection';
     export const ViewOutput = 'python.viewOutput';
+    export const Start_Profiling = 'python.startProfiling';
+    export const Stop_Profiling = 'python.stopProfiling';
 }
 
 // Look at https://microsoft.github.io/vscode-codicons/dist/codicon.html for other Octicon icon ids

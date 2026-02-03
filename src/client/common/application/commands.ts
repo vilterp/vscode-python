@@ -41,6 +41,8 @@ interface ICommandNameWithoutArgumentTypeMapping {
     [Commands.CreateNewFile]: [];
     [Commands.ReportIssue]: [];
     [LSCommands.RestartLS]: [];
+    [Commands.Start_Profiling]: [];
+    [Commands.Stop_Profiling]: [];
 }
 
 export type AllCommands = keyof ICommandNameArgumentTypeMapping;
