@@ -27,6 +27,11 @@ import {
     IDebugSessionLoggingFactory,
     IOutdatedDebuggerPromptFactory,
 } from './types';
+import { ProfilingCommands } from './profiling/profilingCommands';
+import { ProfilingEventHandler } from './profiling/profilingEventHandler';
+import { ProfilingService } from './profiling/profilingService';
+import { ProfileViewerManager } from './profiling/profileViewerManager';
+import { IProfilingService, IProfileViewerManager } from './profiling/types';
 
 export function registerTypes(serviceManager: IServiceManager): void {
     serviceManager.addSingleton<IDebugConfigurationService>(
@@ -67,4 +72,10 @@ export function registerTypes(serviceManager: IServiceManager): void {
         AttachProcessProviderFactory,
     );
     serviceManager.addSingleton<IExtensionSingleActivationService>(IExtensionSingleActivationService, DebugCommands);
+    
+    // Profiling services
+    serviceManager.addSingleton<IProfilingService>(IProfilingService, ProfilingService);
+    serviceManager.addSingleton<IProfileViewerManager>(IProfileViewerManager, ProfileViewerManager);
+    serviceManager.addSingleton<IDebugSessionEventHandlers>(IDebugSessionEventHandlers, ProfilingEventHandler);
+    serviceManager.addSingleton<IExtensionSingleActivationService>(IExtensionSingleActivationService, ProfilingCommands);
 }
