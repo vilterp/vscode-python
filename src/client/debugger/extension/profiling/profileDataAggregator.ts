@@ -44,8 +44,9 @@ export class ProfileDataAggregator {
         let currentNode = this.root;
         currentNode.totalCount++;
 
-        // Process frames from bottom of stack to top
-        for (let i = sample.frames.length - 1; i >= 0; i--) {
+        // Process frames from bottom of stack (outermost) to top (innermost)
+        // frames[0] = bottom/root (e.g., main), frames[n-1] = top/leaf (currently executing)
+        for (let i = 0; i < sample.frames.length; i++) {
             const frame = sample.frames[i];
             const key = `${frame.filename}:${frame.line}:${frame.name}`;
 
@@ -66,7 +67,7 @@ export class ProfileDataAggregator {
             currentNode = childNode;
         }
 
-        // Increment self count for the leaf node (top of stack)
+        // Increment self count for the leaf node (currently executing, top of stack)
         currentNode.selfCount++;
     }
 
@@ -99,8 +100,16 @@ export class ProfileDataAggregator {
      * Convert the profile tree to a flat function table
      */
     public toFunctionTable(): FunctionTableRow[] {
-        const rows: FunctionTableRow[] = [];
-        this.collectFunctionRows(this.root, rows);
+        const functionMap = new Map<string, FunctionTableRow>();
+        this.collectFunctionRows(this.root, functionMap);
+        
+        const rows = Array.from(functionMap.values());
+        
+        // Recalculate percentages based on total samples
+        for (const row of rows) {
+            row.selfPercent = this.getPercent(row.selfTime);
+            row.totalPercent = this.getPercent(row.totalTime);
+        }
         
         // Sort by total time descending
         rows.sort((a, b) => b.totalTime - a.totalTime);
@@ -108,21 +117,30 @@ export class ProfileDataAggregator {
         return rows;
     }
 
-    private collectFunctionRows(node: ProfileNode, rows: FunctionTableRow[]): void {
+    private collectFunctionRows(node: ProfileNode, functionMap: Map<string, FunctionTableRow>): void {
         if (node.name && node.name !== 'root') {
-            rows.push({
-                name: node.name,
-                filename: node.filename,
-                line: node.line,
-                selfTime: node.selfCount,
-                totalTime: node.totalCount,
-                selfPercent: this.getPercent(node.selfCount),
-                totalPercent: this.getPercent(node.totalCount),
-            });
+            const key = `${node.filename}:${node.line}:${node.name}`;
+            
+            let row = functionMap.get(key);
+            if (!row) {
+                row = {
+                    name: node.name,
+                    filename: node.filename,
+                    line: node.line,
+                    selfTime: 0,
+                    totalTime: 0,
+                    selfPercent: 0,
+                    totalPercent: 0,
+                };
+                functionMap.set(key, row);
+            }
+            
+            row.selfTime += node.selfCount;
+            row.totalTime += node.totalCount;
         }
 
         for (const child of node.children.values()) {
-            this.collectFunctionRows(child, rows);
+            this.collectFunctionRows(child, functionMap);
         }
     }
 
