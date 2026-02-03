@@ -4,7 +4,17 @@ This guide explains how to use a custom version of debugpy (such as [vilterp/deb
 
 ## Overview
 
-The VS Code Python extension uses debugpy through the separate `ms-python.debugpy` extension. To use a custom debugpy version, you have several options depending on your use case.
+The VS Code Python extension uses debugpy through the separate `ms-python.debugpy` extension. The debugpy extension typically bundles its own version of debugpy, but it can also detect and use debugpy installed in your Python environment.
+
+### How debugpy is Resolved
+
+The `ms-python.debugpy` extension determines which debugpy to use with the following priority:
+
+1. **`debugAdapterPath` in launch.json** - If specified, this path is used directly (highest priority)
+2. **debugpy in active Python environment** - The extension checks if debugpy is installed in the currently selected Python interpreter
+3. **Bundled debugpy** - If not found in the environment, it falls back to the version bundled with the `ms-python.debugpy` extension
+
+This means that **installing debugpy in your Python environment will cause it to be used automatically**, making Method 1 below the simplest approach for testing custom versions.
 
 ## Quick Start (For Testing Profiling)
 
@@ -17,14 +27,23 @@ pip install git+https://github.com/vilterp/debugpy.git@profiling-support
 # 2. Verify installation
 python -c "import debugpy; print(debugpy.__version__, debugpy.__file__)"
 
-# 3. Start debugging - the extension will use this debugpy
+# 3. Start debugging - the extension will automatically use this debugpy
 ```
 
-The extension will automatically find debugpy installed in your active Python environment.
+The `ms-python.debugpy` extension will detect and use the debugpy installed in your active Python environment, giving it priority over its bundled version.
 
 ## Method 1: Install in Python Environment (Recommended)
 
-This is the simplest approach and works well for testing.
+This is the simplest approach and works because the `ms-python.debugpy` extension checks the active Python environment for debugpy before using its bundled version.
+
+### Why This Works
+
+The debugpy extension follows this resolution order:
+1. Checks if debugpy is importable in the selected Python environment
+2. If found, uses that version
+3. If not found, falls back to the bundled debugpy
+
+This means any debugpy installed via `pip install` in your active environment will be automatically detected and used.
 
 ### Steps
 
@@ -55,7 +74,7 @@ This is the simplest approach and works well for testing.
 
 4. **Start debugging:**
 
-   The extension will automatically use the debugpy from your selected Python environment.
+   The `ms-python.debugpy` extension will detect and use the debugpy from your selected Python environment, giving it priority over the bundled version.
 
 ### Verification
 
@@ -173,6 +192,56 @@ The `ms-python.debugpy` extension bundles debugpy and exposes it to the Python e
 - Most complex approach
 - Requires rebuilding when debugpy changes
 - Need to manage extension updates separately
+
+## Understanding debugpy Resolution Order
+
+This section clarifies how the VS Code Python debugging system determines which debugpy to use.
+
+### The Resolution Process
+
+When you start a debug session, the Python extension queries the `ms-python.debugpy` extension for the debugpy path. The debugpy extension uses the following priority order:
+
+1. **Explicit `debugAdapterPath` setting** (highest priority)
+   - If you specify `debugAdapterPath` in your launch.json configuration
+   - This path is used directly, overriding all other options
+   - Use case: Testing specific debugpy versions or comparing multiple installations
+
+2. **debugpy in active Python environment** (second priority)
+   - The extension checks if debugpy is importable in your selected Python interpreter
+   - If found via `import debugpy`, that installation is used
+   - Use case: Most common for development and testing custom versions
+
+3. **Bundled debugpy in ms-python.debugpy extension** (fallback)
+   - If debugpy is not found in the environment and no path is specified
+   - The extension uses its internally bundled debugpy
+   - Use case: Default behavior for most users
+
+### Key Insight
+
+**Yes, the debugpy extension does check the virtual environment first!** Before falling back to its bundled version, it attempts to import debugpy from the active Python environment. This is why Method 1 (installing in your Python environment) works seamlessly.
+
+### How to Verify Which debugpy is Being Used
+
+1. **Check Python environment:**
+   ```bash
+   python -c "import debugpy; print('Version:', debugpy.__version__); print('Location:', debugpy.__file__)"
+   ```
+
+2. **Check Debug Console during debugging:**
+   - Start a debug session
+   - Look for "DAP Server launched with command:" message
+   - The path will show which debugpy is being used
+
+3. **Expected output:**
+   - Custom environment: `/path/to/venv/lib/python3.x/site-packages/debugpy/adapter`
+   - Bundled: `/path/to/.vscode/extensions/ms-python.debugpy-x.x.x/bundled/libs/debugpy/adapter`
+
+### Important Notes
+
+- The resolution happens at debug session start time
+- Changing Python interpreters will change which debugpy is used
+- The bundled debugpy is only used as a fallback if no debugpy is found in the environment
+- This behavior makes testing custom debugpy versions straightforward: just install it in your environment
 
 ## Troubleshooting
 
@@ -337,20 +406,68 @@ When specifically testing the profiling feature:
 
 ## Summary
 
+### Resolution Order Recap
+
+The `ms-python.debugpy` extension resolves debugpy in this order:
+1. ✅ **`debugAdapterPath` in launch.json** (if specified)
+2. ✅ **debugpy in active Python environment** (checked via import)
+3. ✅ **Bundled debugpy** (fallback)
+
+This means **installing debugpy in your environment takes priority over the bundled version**, making Method 1 the simplest approach.
+
+### Recommended Approaches
+
 **For quick testing (Recommended):**
 - Use Method 1: Install in Python environment
 - Simple `pip install` command
+- Automatically detected and prioritized over bundled version
 - Works immediately with VS Code
 
 **For development:**
 - Use Method 2: debugAdapterPath in launch.json
 - Explicit control over debugpy version
 - Easy to switch between versions
+- Highest priority, overrides environment detection
 
 **For production/distribution:**
 - Use Method 3: Custom extension build
 - Cleanest user experience
 - More work to set up and maintain
+- Good for packaging specific debugpy versions
+
+## Frequently Asked Questions
+
+### Does the debugpy extension check my virtual environment first?
+
+**Yes!** The `ms-python.debugpy` extension checks if debugpy is installed in your active Python environment before falling back to its bundled version. This is why simply installing debugpy with `pip install` in your virtual environment works automatically.
+
+### Do I need to configure anything for it to use my environment's debugpy?
+
+**No configuration needed!** As long as:
+1. You have debugpy installed in your Python environment
+2. That environment is selected in VS Code (via "Python: Select Interpreter")
+3. You start a debug session
+
+The extension will automatically detect and use your environment's debugpy.
+
+### What if I have debugpy installed but it's still using the bundled version?
+
+Check these common issues:
+1. **Wrong environment selected** - Make sure the correct Python interpreter is active
+2. **debugpy not actually installed** - Run `python -c "import debugpy; print(debugpy.__file__)"`
+3. **Old VS Code cache** - Try reloading VS Code window
+
+### Can I force a specific debugpy version?
+
+Yes, use `debugAdapterPath` in your launch.json configuration. This overrides both environment detection and bundled version.
+
+### Does this work with virtual environments, conda, poetry, etc.?
+
+Yes! As long as you:
+1. Install debugpy in that environment
+2. Select that environment in VS Code
+
+The extension will detect it regardless of which environment manager you use (venv, conda, poetry, pipenv, etc.).
 
 ## Additional Resources
 
